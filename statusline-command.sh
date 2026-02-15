@@ -113,10 +113,10 @@ case "$model" in
     *)        model_color="1;36" ;;
 esac
 
-if [ "$total_cost" != "0" ] && [ "$total_cost" != "null" ]; then
-    cost_display=$(awk "BEGIN {printf \" (\$%.2f)\", $total_cost}")
+if [ "$total_cost" != "null" ]; then
+    cost_display=$(awk "BEGIN {printf \"\$%.0f\", $total_cost}")
 else
-    cost_display=""
+    cost_display="\$0"
 fi
 
 session_time_sec=$((session_time_ms / 1000))
@@ -125,9 +125,9 @@ session_mins=$(((session_time_sec % 3600) / 60))
 session_secs=$((session_time_sec % 60))
 
 if [ "$session_hours" -gt 0 ]; then
-    time_display=$(printf "%02d:%02d:%02d%s" "$session_hours" "$session_mins" "$session_secs" "$cost_display")
+    time_display=$(printf "%02d:%02d:%02d" "$session_hours" "$session_mins" "$session_secs")
 else
-    time_display=$(printf "%02d:%02d%s" "$session_mins" "$session_secs" "$cost_display")
+    time_display=$(printf "%02d:%02d" "$session_mins" "$session_secs")
 fi
 
 if [ "$total_input_tokens" -ge 1000 ]; then
@@ -142,5 +142,5 @@ else
     output_display="$total_output_tokens"
 fi
 
-printf "\033[${model_color}m%s\033[0m%s │ \033[${bar_color}m%s %d%%\033[0m \033[37m(%s)\033[0m │ \033[32m+%s\033[0m \033[31m-%s\033[0m │ ↓%s ↑%s │ %s%s │ \033[93m%s\033[0m" \
-    "$model" "$style_display" "$progress_bar" "$context_pct" "$total_display" "$lines_added" "$lines_removed" "$input_display" "$output_display" "$dir_display" "$git_branch" "$time_display"
+printf "\033[${model_color}m%s\033[0m%s │ \033[${bar_color}m%s %d%%\033[0m \033[37m(%s)\033[0m │ \033[32m+%s\033[0m \033[31m-%s\033[0m │ ↓%s ↑%s │ %s%s │ \033[93m%s\033[0m │ \033[92m%s\033[0m" \
+    "$model" "$style_display" "$progress_bar" "$context_pct" "$total_display" "$lines_added" "$lines_removed" "$input_display" "$output_display" "$dir_display" "$git_branch" "$time_display" "$cost_display"
