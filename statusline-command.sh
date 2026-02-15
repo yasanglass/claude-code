@@ -13,6 +13,7 @@ lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 session_time_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
 total_input_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
 total_output_tokens=$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')
+total_cost=$(echo "$input" | jq -r '.cost.total_cost // 0')
 
 context_size=$(echo "$input" | jq -r '.context_window.context_window_size')
 current_input=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // 0')
@@ -112,17 +113,21 @@ case "$model" in
     *)        model_color="1;36" ;;
 esac
 
+if [ "$total_cost" != "0" ] && [ "$total_cost" != "null" ]; then
+    cost_display=$(awk "BEGIN {printf \" (\$%.2f)\", $total_cost}")
+else
+    cost_display=""
+fi
+
 session_time_sec=$((session_time_ms / 1000))
 session_hours=$((session_time_sec / 3600))
 session_mins=$(((session_time_sec % 3600) / 60))
 session_secs=$((session_time_sec % 60))
 
 if [ "$session_hours" -gt 0 ]; then
-    time_display=$(printf "%dh%dm" "$session_hours" "$session_mins")
-elif [ "$session_mins" -gt 0 ]; then
-    time_display=$(printf "%dm%ds" "$session_mins" "$session_secs")
+    time_display=$(printf "%02d:%02d:%02d%s" "$session_hours" "$session_mins" "$session_secs" "$cost_display")
 else
-    time_display=$(printf "%ds" "$session_secs")
+    time_display=$(printf "%02d:%02d%s" "$session_mins" "$session_secs" "$cost_display")
 fi
 
 if [ "$total_input_tokens" -ge 1000 ]; then
@@ -137,5 +142,5 @@ else
     output_display="$total_output_tokens"
 fi
 
-printf "\033[${model_color}m%s\033[0m%s │ \033[${bar_color}m%s %d%%\033[0m \033[37m(%s)\033[0m │ \033[32m+%s\033[0m \033[31m-%s\033[0m │ ↓%s ↑%s │ \033[93m%s\033[0m │ %s%s" \
-    "$model" "$style_display" "$progress_bar" "$context_pct" "$total_display" "$lines_added" "$lines_removed" "$input_display" "$output_display" "$time_display" "$dir_display" "$git_branch"
+printf "\033[${model_color}m%s\033[0m%s │ \033[${bar_color}m%s %d%%\033[0m \033[37m(%s)\033[0m │ \033[32m+%s\033[0m \033[31m-%s\033[0m │ ↓%s ↑%s │ %s%s │ \033[93m%s\033[0m" \
+    "$model" "$style_display" "$progress_bar" "$context_pct" "$total_display" "$lines_added" "$lines_removed" "$input_display" "$output_display" "$dir_display" "$git_branch" "$time_display"
