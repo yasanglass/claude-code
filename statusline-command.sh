@@ -122,13 +122,14 @@ fi
 session_time_sec=$((session_time_ms / 1000))
 session_hours=$((session_time_sec / 3600))
 session_mins=$(((session_time_sec % 3600) / 60))
-session_secs=$((session_time_sec % 60))
 
 if [ "$session_hours" -gt 0 ]; then
-    time_display=$(printf "%02d:%02d:%02d" "$session_hours" "$session_mins" "$session_secs")
+    time_display=$(printf "%dh%02dm" "$session_hours" "$session_mins")
 else
-    time_display=$(printf "%02d:%02d" "$session_mins" "$session_secs")
+    time_display=$(printf "%dm" "$session_mins")
 fi
+
+version=$(echo "$input" | jq -r '.version // "?"')
 
 if [ "$total_input_tokens" -ge 1000 ]; then
     input_display=$(awk "BEGIN {printf \"%.0fK\", $total_input_tokens/1000}")
@@ -142,5 +143,5 @@ else
     output_display="$total_output_tokens"
 fi
 
-printf "\033[${model_color}m%s\033[0m%s │ \033[${bar_color}m%s %d%%\033[0m \033[37m(%s)\033[0m │ \033[32m+%s\033[0m \033[31m-%s\033[0m │ ↓%s ↑%s │ %s%s │ \033[93m%s\033[0m │ \033[92m%s\033[0m" \
-    "$model" "$style_display" "$progress_bar" "$context_pct" "$total_display" "$lines_added" "$lines_removed" "$input_display" "$output_display" "$dir_display" "$git_branch" "$time_display" "$cost_display"
+printf "\033[${model_color}m%s\033[0m%s │ \033[${bar_color}m%s %d%%\033[0m \033[37m(%s)\033[0m │ \033[32m+%s\033[0m \033[31m-%s\033[0m │ ↓%s ↑%s │ %s%s │ \033[93m%s\033[0m │ \033[92m%s\033[0m │ \033[90mv%s\033[0m" \
+    "$model" "$style_display" "$progress_bar" "$context_pct" "$total_display" "$lines_added" "$lines_removed" "$input_display" "$output_display" "$dir_display" "$git_branch" "$time_display" "$cost_display" "$version"
