@@ -1,6 +1,11 @@
 #!/bin/bash
 INPUT=$(cat)
 
+# Skip "say" if in an active Zoom meeting (CptHost only runs during meetings)
+if pgrep -x "CptHost" > /dev/null 2>&1; then
+  exit 0
+fi
+
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name')
 CWD=$(echo "$INPUT" | jq -r '.cwd')
 if [ "$CWD" = "$HOME" ]; then
