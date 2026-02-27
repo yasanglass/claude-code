@@ -18,12 +18,16 @@ case "$EVENT" in
   Stop)
     STOP_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active')
     if [ "$STOP_ACTIVE" = "false" ] || [ "$STOP_ACTIVE" = "null" ]; then
-      say "Claude finished in $DIR_NAME" &
+      AUDIO_FILE="/tmp/claude-hook.aiff"
+      VOLUME=0.25
+      say -o "$AUDIO_FILE" "Claude finished in $DIR_NAME" && afplay --volume "$VOLUME" "$AUDIO_FILE" &
     fi
     ;;
   Notification)
     TITLE=$(echo "$INPUT" | jq -r '.title // "Claude"')
-    say "$TITLE in $DIR_NAME" &
+    AUDIO_FILE="/tmp/claude-hook.aiff"
+    VOLUME=0.25
+    say -o "$AUDIO_FILE" "$TITLE in $DIR_NAME" && afplay --volume "$VOLUME" "$AUDIO_FILE" &
     ;;
 esac
 
